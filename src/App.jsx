@@ -250,8 +250,39 @@ function App() {
         // Slides 2-8 (List)
         if (index >= 1 && index <= 7 && newDrafts[index].type === 'list') {
           if (item.title) newDrafts[index].title = item.title;
+
+          if (item.displayMode) {
+            newDrafts[index].displayMode = item.displayMode;
+          }
+
+          // Auto-sensing from generic "content" key
+          if (item.content) {
+            if (Array.isArray(item.content)) {
+              newDrafts[index].bullets = item.content;
+              if (!item.displayMode) newDrafts[index].displayMode = 'bullets';
+            } else if (typeof item.content === 'string') {
+              // Check if string looks like a bulleted list (multiple lines starting with bullet symbols)
+              const lines = item.content.split('\n').map(line => line.trim()).filter(line => line);
+              const isList = lines.length > 1 && lines.every(line => /^[-・*•]\s*/.test(line));
+
+              if (isList) {
+                newDrafts[index].bullets = lines.map(line => line.replace(/^[-・*•]\s*/, ''));
+                if (!item.displayMode) newDrafts[index].displayMode = 'bullets';
+              } else {
+                newDrafts[index].bodyText = item.content.replace(/\n/g, '<br>');
+                if (!item.displayMode) newDrafts[index].displayMode = 'text';
+              }
+            }
+          }
+
           if (item.bullets && Array.isArray(item.bullets)) {
             newDrafts[index].bullets = item.bullets;
+            if (!item.displayMode) newDrafts[index].displayMode = 'bullets';
+          }
+
+          if (item.bodyText) {
+            newDrafts[index].bodyText = item.bodyText;
+            if (!item.displayMode) newDrafts[index].displayMode = 'text';
           }
         }
       });
@@ -596,8 +627,9 @@ function App() {
               <div style={{ backgroundColor: '#0d1117', padding: '15px', borderRadius: '6px', border: '1px solid #30363d', fontSize: '12px', color: '#8b949e', fontFamily: 'monospace' }}>
                 【入力フォーマット例：全8要素】<br />
                 [<br />
-                &nbsp;&nbsp;&#123; "catchphrase": "〇〇な人へ", "title": "魔法の解決策&lt;br&gt;7選" &#125;, &nbsp;// ← 1枚目(表紙) <br />
-                &nbsp;&nbsp;&#123; "title": "【1】 〇〇について", "bullets": ["ポイント1", "ポイント2"] &#125;, // ← 2枚目<br />
+                &nbsp;&nbsp;&#123; "catchphrase": "〇〇な人へ", "title": "解決策&lt;br&gt;7選" &#125;, &nbsp;// ← 1枚目(表紙) <br />
+                &nbsp;&nbsp;&#123; "title": "【1】 どんな内容でもOK", "content": "「content」キーに文章や箇条書きを指定すると、アプリが勝手に判別します！" &#125;, <br />
+                &nbsp;&nbsp;&#123; "title": "【2】 箇条書き", "content": ["ポイント1", "ポイント2"] &#125;, // ← 3枚目<br />
                 &nbsp;&nbsp;...<br />
                 ]
               </div>
