@@ -298,8 +298,25 @@ function App() {
     if (slideType === 'cover') return '/digital_white_cover_v3_1772164707790.png';
     if (slideType === 'list') return '/digital_white_usecase_v2_1772164366186.png';
     if (slideType === 'cta' || slideType === 'profile') return '/digital_white_cta_v2_1772164380506.png';
+    if (slideType === 'cta' || slideType === 'profile') return '/digital_white_cta_v2_1772164380506.png';
     return originalBg;
   };
+
+  const FontSizeSlider = ({ slideId, fieldKey, value, label }) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+      <label style={{ fontSize: '10px', color: '#8b949e', whiteSpace: 'nowrap', margin: 0 }}>{label || '文字サイズ'}</label>
+      <input
+        type="range"
+        min="0.5"
+        max="2.0"
+        step="0.05"
+        value={value || 1}
+        onChange={(e) => handleUpdateSlide(slideId, fieldKey, parseFloat(e.target.value))}
+        style={{ width: '60px', height: '4px' }}
+      />
+      <span style={{ fontSize: '10px', color: '#8b949e', width: '25px', textAlign: 'right' }}>{Math.round((value || 1) * 100)}%</span>
+    </div>
+  );
 
   return (
     <div className={`app-container ${globalTheme === 'light' ? 'theme-light' : ''}`} style={{ '--font-scale': fontScale }}>
@@ -373,7 +390,10 @@ function App() {
               {slide.type === 'cover' && (
                 <>
                   <div className="form-group">
-                    <label>キャッチコピー</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>キャッチコピー</label>
+                      <FontSizeSlider slideId={slide.id} fieldKey="catchphraseScale" value={slide.catchphraseScale} />
+                    </div>
                     <input
                       type="text"
                       value={slide.catchphrase}
@@ -381,7 +401,10 @@ function App() {
                     />
                   </div>
                   <div className="form-group">
-                    <label>タイトル (HTML可)</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>タイトル (HTML可)</label>
+                      <FontSizeSlider slideId={slide.id} fieldKey="titleScale" value={slide.titleScale} />
+                    </div>
                     <textarea
                       value={slide.title}
                       onChange={(e) => handleUpdateSlide(slide.id, 'title', e.target.value)}
@@ -394,7 +417,10 @@ function App() {
               {slide.type === 'list' && (
                 <>
                   <div className="form-group">
-                    <label>スライド見出し</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>スライド見出し</label>
+                      <FontSizeSlider slideId={slide.id} fieldKey="titleScale" value={slide.titleScale} />
+                    </div>
                     <input
                       type="text"
                       value={slide.title}
@@ -451,7 +477,10 @@ function App() {
 
                   {(!slide.displayMode || slide.displayMode === 'bullets') ? (
                     <div className="form-group">
-                      <label>箇条書き</label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <label style={{ margin: 0 }}>箇条書き</label>
+                        <FontSizeSlider slideId={slide.id} fieldKey="bodyScale" value={slide.bodyScale} />
+                      </div>
                       <div className="bullet-list-editor">
                         {slide.bullets?.map((b, bIdx) => (
                           <div key={bIdx} className="bullet-item">
@@ -475,13 +504,16 @@ function App() {
                     <div className="form-group">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <label style={{ margin: 0 }}>文章 (HTML可)</label>
-                        <button
-                          className="add-btn"
-                          style={{ padding: '4px 8px', margin: 0, fontSize: '12px', width: 'auto' }}
-                          onClick={() => handleUpdateSlide(slide.id, 'bodyText', (slide.bodyText || '') + '<br>')}
-                        >
-                          <Plus size={14} /> 改行タグ(&lt;br&gt;)を追加
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <FontSizeSlider slideId={slide.id} fieldKey="bodyScale" value={slide.bodyScale} />
+                          <button
+                            className="add-btn"
+                            style={{ padding: '4px 8px', margin: 0, fontSize: '12px', width: 'auto' }}
+                            onClick={() => handleUpdateSlide(slide.id, 'bodyText', (slide.bodyText || '') + '<br>')}
+                          >
+                            <Plus size={14} /> 改行追加
+                          </button>
+                        </div>
                       </div>
                       <textarea
                         value={slide.bodyText || ''}
@@ -497,21 +529,30 @@ function App() {
               {slide.type === 'cta' && (
                 <>
                   <div className="form-group">
-                    <label>メインメッセージ (HTML可)</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>メインメッセージ (HTML可)</label>
+                      <FontSizeSlider slideId={slide.id} fieldKey="titleScale" value={slide.titleScale} />
+                    </div>
                     <textarea
                       value={slide.title}
                       onChange={(e) => handleUpdateSlide(slide.id, 'title', e.target.value)}
                     />
                   </div>
                   <div className="form-group">
-                    <label>サブメッセージ (HTML可)</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>サブメッセージ (HTML可)</label>
+                      <FontSizeSlider slideId={slide.id} fieldKey="catchphraseScale" value={slide.catchphraseScale} />
+                    </div>
                     <textarea
                       value={slide.subtitle}
                       onChange={(e) => handleUpdateSlide(slide.id, 'subtitle', e.target.value)}
                     />
                   </div>
                   <div className="form-group">
-                    <label>ボタンテキスト</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>ボタンテキスト</label>
+                      <FontSizeSlider slideId={slide.id} fieldKey="footerScale" value={slide.footerScale} />
+                    </div>
                     <input
                       type="text"
                       value={slide.buttonText}
@@ -525,7 +566,10 @@ function App() {
               {slide.type === 'profile' && (
                 <>
                   <div className="form-group">
-                    <label>名前</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>名前</label>
+                      <FontSizeSlider slideId={slide.id} fieldKey="nameScale" value={slide.nameScale} />
+                    </div>
                     <input
                       type="text"
                       value={slide.name}
@@ -533,7 +577,10 @@ function App() {
                     />
                   </div>
                   <div className="form-group">
-                    <label>肩書き</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>肩書き</label>
+                      <FontSizeSlider slideId={slide.id} fieldKey="roleScale" value={slide.roleScale} />
+                    </div>
                     <input
                       type="text"
                       value={slide.role}
@@ -541,14 +588,20 @@ function App() {
                     />
                   </div>
                   <div className="form-group">
-                    <label>キャッチフレーズ (HTML可)</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>キャッチフレーズ (HTML可)</label>
+                      <FontSizeSlider slideId={slide.id} fieldKey="catchphraseScale" value={slide.catchphraseScale} />
+                    </div>
                     <textarea
                       value={slide.catchphrase}
                       onChange={(e) => handleUpdateSlide(slide.id, 'catchphrase', e.target.value)}
                     />
                   </div>
                   <div className="form-group">
-                    <label>サービス内容</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>サービス内容</label>
+                      <FontSizeSlider slideId={slide.id} fieldKey="servicesScale" value={slide.servicesScale} />
+                    </div>
                     <div className="bullet-list-editor">
                       {slide.services.map((s, sIdx) => (
                         <div key={sIdx} className="bullet-item">
