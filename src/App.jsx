@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Slide from './components/Slide';
 import * as htmlToImage from 'html-to-image';
 import JSZip from 'jszip';
@@ -142,6 +142,11 @@ function App() {
   const [globalTheme, setGlobalTheme] = useState('navy'); // 'navy' or 'light'
   const [fontScale, setFontScale] = useState(1.0);
 
+  // Auto-sync draftSlides to slides for real-time preview
+  useEffect(() => {
+    setSlides(draftSlides);
+  }, [draftSlides]);
+
   // Updates simple string properties in DRAFT
   const handleUpdateSlide = (id, field, value) => {
     setDraftSlides(draftSlides.map(slide =>
@@ -181,11 +186,6 @@ function App() {
       }
       return slide;
     }));
-  };
-
-  // Applies draft changes to the actual slides visible in preview
-  const handleApplyChanges = () => {
-    setSlides(draftSlides);
   };
 
   const handleDownloadAll = async () => {
@@ -325,13 +325,6 @@ function App() {
         <div className="editor-header" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '15px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h1>カルーセル編集エディタ</h1>
-            <button
-              className="download-all-btn"
-              style={{ padding: '8px 15px', fontSize: '14px', marginBottom: 0, background: 'linear-gradient(135deg, #1f6feb, #388bfd)', color: '#ffffff' }}
-              onClick={handleApplyChanges}
-            >
-              プレビューに反映
-            </button>
           </div>
 
           {/* Global Controls */}
