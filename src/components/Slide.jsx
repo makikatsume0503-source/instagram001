@@ -73,16 +73,16 @@ const Slide = ({ data, id }) => {
       case 'cover':
         return (
           <>
-            <div className="cover-catchphrase" style={{ fontSize: data.catchphraseScale ? `${data.catchphraseScale * 100}%` : undefined }} dangerouslySetInnerHTML={{ __html: data.catchphrase }}></div>
-            <div className="slide-title gold-text" style={{ fontSize: data.titleScale ? `${data.titleScale * 100}%` : undefined }} dangerouslySetInnerHTML={{ __html: data.title }}></div>
-            <div className="instructor-tag" style={{ fontSize: data.footerScale ? `${data.footerScale * 100}%` : undefined }}>{data.footer}</div>
+            <div className="cover-catchphrase" style={data.catchphraseScale ? { '--local-scale': data.catchphraseScale } : undefined} dangerouslySetInnerHTML={{ __html: data.catchphrase }}></div>
+            <div className="slide-title gold-text" style={data.titleScale ? { '--local-scale': data.titleScale } : undefined} dangerouslySetInnerHTML={{ __html: data.title }}></div>
+            <div className="instructor-tag" style={data.footerScale ? { '--local-scale': data.footerScale } : undefined}>{data.footer}</div>
           </>
         );
       case 'list':
         return (
           <>
-            <div className="slide-subtitle gold-text" style={{ fontSize: data.titleScale ? `${data.titleScale * 100}%` : undefined }}>{data.title}</div>
-            <div className="slide-body" style={{ fontSize: data.bodyScale ? `${data.bodyScale * 100}%` : undefined }}>
+            <div className="slide-subtitle gold-text" style={data.titleScale ? { '--local-scale': data.titleScale } : undefined}>{data.title}</div>
+            <div className="slide-body" style={data.bodyScale ? { '--local-scale': data.bodyScale } : undefined}>
               {data.displayMode === 'text' ? (
                 <div dangerouslySetInnerHTML={{ __html: data.bodyText || '' }}></div>
               ) : (
@@ -104,9 +104,9 @@ const Slide = ({ data, id }) => {
       case 'cta':
         return (
           <>
-            <div className="cta-text gold-text" style={{ fontSize: data.titleScale ? `${data.titleScale * 100}%` : undefined }} dangerouslySetInnerHTML={{ __html: data.title }}></div>
-            <div className="cta-subtext" style={{ fontSize: data.catchphraseScale ? `${data.catchphraseScale * 100}%` : undefined }} dangerouslySetInnerHTML={{ __html: data.subtitle }}></div>
-            <div className="cta-action" style={{ fontSize: data.footerScale ? `${data.footerScale * 100}%` : undefined }}>{data.buttonText}</div>
+            <div className="cta-text gold-text" style={data.titleScale ? { '--local-scale': data.titleScale } : undefined} dangerouslySetInnerHTML={{ __html: data.title }}></div>
+            <div className="cta-subtext" style={data.catchphraseScale ? { '--local-scale': data.catchphraseScale } : undefined} dangerouslySetInnerHTML={{ __html: data.subtitle }}></div>
+            <div className="cta-action" style={data.footerScale ? { '--local-scale': data.footerScale } : undefined}>{data.buttonText}</div>
           </>
         );
       case 'profile':
@@ -115,10 +115,10 @@ const Slide = ({ data, id }) => {
             <div className="profile-image-wrapper">
               <img src={data.imageSrc} alt={data.name} className="profile-image" />
             </div>
-            <div className="profile-name" style={{ fontSize: data.nameScale ? `${data.nameScale * 100}%` : undefined }}>{data.name}</div>
-            <div className="profile-title" style={{ fontSize: data.roleScale ? `${data.roleScale * 100}%` : undefined }}>{data.role}</div>
-            <div className="profile-catchphrase" style={{ fontSize: data.catchphraseScale ? `${data.catchphraseScale * 100}%` : undefined }} dangerouslySetInnerHTML={{ __html: data.catchphrase }}></div>
-            <div className="profile-services" style={{ fontSize: data.servicesScale ? `${data.servicesScale * 100}%` : undefined }}>
+            <div className="profile-name" style={data.nameScale ? { '--local-scale': data.nameScale } : undefined}>{data.name}</div>
+            <div className="profile-title" style={data.roleScale ? { '--local-scale': data.roleScale } : undefined}>{data.role}</div>
+            <div className="profile-catchphrase" style={data.catchphraseScale ? { '--local-scale': data.catchphraseScale } : undefined} dangerouslySetInnerHTML={{ __html: data.catchphrase }}></div>
+            <div className="profile-services" style={data.servicesScale ? { '--local-scale': data.servicesScale } : undefined}>
               <div className="profile-services-title">サービス内容</div>
               <ul>
                 {data.services.map((service, index) => (

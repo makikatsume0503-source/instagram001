@@ -258,7 +258,7 @@ button.add-btn:hover {
 
 /* typography */
 .slide-title {
-  font-size: calc(80px * var(--font-scale));
+  font-size: calc(80px * var(--font-scale) * var(--local-scale, 1));
   font-weight: 900;
   line-height: 1.4;
   letter-spacing: 0.05em;
@@ -267,7 +267,7 @@ button.add-btn:hover {
 }
 
 .cover-catchphrase {
-  font-size: calc(50px * var(--font-scale));
+  font-size: calc(50px * var(--font-scale) * var(--local-scale, 1));
   font-weight: 700;
   color: #ffffff;
   margin-top: -120px;
@@ -281,7 +281,7 @@ button.add-btn:hover {
   bottom: 60px;
   width: 100%;
   text-align: center;
-  font-size: calc(30px * var(--font-scale));
+  font-size: calc(30px * var(--font-scale) * var(--local-scale, 1));
   font-weight: 500;
   color: #a0aec0;
   letter-spacing: 0.1em;
@@ -289,7 +289,7 @@ button.add-btn:hover {
 }
 
 .slide-subtitle {
-  font-size: calc(45px * var(--font-scale));
+  font-size: calc(45px * var(--font-scale) * var(--local-scale, 1));
   font-weight: 700;
   color: #e2e8f0;
   margin-bottom: 30px;
@@ -302,7 +302,7 @@ button.add-btn:hover {
 }
 
 .slide-body {
-  font-size: calc(34px * var(--font-scale));
+  font-size: calc(34px * var(--font-scale) * var(--local-scale, 1));
   font-weight: 500;
   color: #ffffff;
   line-height: 1.6;
@@ -333,7 +333,7 @@ button.add-btn:hover {
   color: #f4d990;
   position: absolute;
   left: 0;
-  font-size: calc(30px * var(--font-scale));
+  font-size: calc(30px * var(--font-scale) * var(--local-scale, 1));
 }
 
 .slide-icon-wrapper {
@@ -348,7 +348,7 @@ button.add-btn:hover {
 }
 
 .cta-text {
-  font-size: calc(60px * var(--font-scale));
+  font-size: calc(60px * var(--font-scale) * var(--local-scale, 1));
   line-height: 1.5;
   font-weight: 700;
   width: 80%;
@@ -356,7 +356,7 @@ button.add-btn:hover {
 }
 
 .cta-subtext {
-  font-size: calc(40px * var(--font-scale));
+  font-size: calc(40px * var(--font-scale) * var(--local-scale, 1));
   color: #e2e8f0;
   font-weight: 500;
 }
@@ -367,7 +367,7 @@ button.add-btn:hover {
   padding: 20px 40px;
   background: linear-gradient(135deg, #cfaf64, #b48e3a);
   color: #0d1117;
-  font-size: calc(45px * var(--font-scale));
+  font-size: calc(45px * var(--font-scale) * var(--local-scale, 1));
   font-weight: 900;
   border-radius: 50px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
@@ -403,7 +403,7 @@ button.add-btn:hover {
 }
 
 .profile-name {
-  font-size: calc(70px * var(--font-scale));
+  font-size: calc(70px * var(--font-scale) * var(--local-scale, 1));
   font-weight: 900;
   color: #ffffff;
   margin-bottom: 15px;
@@ -411,7 +411,7 @@ button.add-btn:hover {
 }
 
 .profile-title {
-  font-size: calc(35px * var(--font-scale));
+  font-size: calc(35px * var(--font-scale) * var(--local-scale, 1));
   font-weight: 700;
   color: #cfaf64;
   margin-bottom: 40px;
@@ -419,7 +419,7 @@ button.add-btn:hover {
 }
 
 .profile-catchphrase {
-  font-size: calc(45px * var(--font-scale));
+  font-size: calc(45px * var(--font-scale) * var(--local-scale, 1));
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 50px;
@@ -441,7 +441,7 @@ button.add-btn:hover {
 }
 
 .profile-services-title {
-  font-size: calc(40px * var(--font-scale));
+  font-size: calc(40px * var(--font-scale) * var(--local-scale, 1));
   font-weight: 900;
   color: #cfaf64;
   margin-bottom: 30px;
@@ -460,7 +460,7 @@ button.add-btn:hover {
 }
 
 .profile-services li {
-  font-size: calc(40px * var(--font-scale));
+  font-size: calc(40px * var(--font-scale) * var(--local-scale, 1));
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 20px;
@@ -475,7 +475,7 @@ button.add-btn:hover {
   color: #f4d990;
   position: absolute;
   left: 0;
-  font-size: calc(40px * var(--font-scale));
+  font-size: calc(40px * var(--font-scale) * var(--local-scale, 1));
 }
 
 /* -------------------------------
