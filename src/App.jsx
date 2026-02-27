@@ -287,9 +287,10 @@ function App() {
         }
       });
       setDraftSlides(newDrafts);
+      setSlides(newDrafts); // ← 即座にプレビューにも反映させる！
       setIsAIModalOpen(false);
       setAiInputText('');
-      alert('AIデータの流し込みに成功しました！プレビューに反映ボタンを押して確認してください。');
+      alert('AIデータの流し込みに成功し、プレビューにも反映しました！');
     } catch (error) {
       alert('データの解析に失敗しました。正しいJSON形式（配列）か確認してください。');
       console.error(error);
