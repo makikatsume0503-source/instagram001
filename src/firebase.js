@@ -11,14 +11,14 @@ import {
     serverTimestamp,
 } from "firebase/firestore";
 
-// Firebase の設定
+// Firebase の設定（環境変数から読み込み）
 const firebaseConfig = {
-    apiKey: "AIzaSyBS257-jG1cnNt2m9PJZCf3Qh1P0ru4NPA",
-    authDomain: "instagram001-2ee7b.firebaseapp.com",
-    projectId: "instagram001-2ee7b",
-    storageBucket: "instagram001-2ee7b.firebasestorage.app",
-    messagingSenderId: "186602355939",
-    appId: "1:186602355939:web:43dc1577b17e53501919d6"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Firebase アプリ初期化
