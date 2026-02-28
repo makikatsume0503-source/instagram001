@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Slide from './components/Slide';
 import * as htmlToImage from 'html-to-image';
 import JSZip from 'jszip';
-import { DownloadCloud, Plus, Trash2, GripVertical, Sparkles, X } from 'lucide-react';
+import { DownloadCloud, Plus, Trash2, GripVertical, Sparkles, X, Save, FolderOpen } from 'lucide-react';
+import { saveProject, loadProject, listProjects, deleteProject } from './firebase';
 
 const defaultSlides = [
   {
@@ -142,6 +143,14 @@ function App() {
   const [globalTheme, setGlobalTheme] = useState('navy'); // 'navy' or 'light'
   const [fontScale, setFontScale] = useState(1.0);
 
+  // Firebase State
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
+  const [projectName, setProjectName] = useState('');
+  const [savedProjects, setSavedProjects] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   // Auto-sync draftSlides to slides for real-time preview
   useEffect(() => {
     setSlides(draftSlides);
@@ -224,6 +233,72 @@ function App() {
       alert('ZIPファイルの作成に失敗しました。');
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  // ========================================
+  // Firebase: 保存・読み込み
+  // ========================================
+
+  const handleSaveProject = async () => {
+    if (!projectName.trim()) {
+      alert('プロジェクト名を入力してください。');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      // IDはプロジェクト名をスラッグ化（スペース→_）
+      const projectId = projectName.trim().replace(/\s+/g, '_');
+      await saveProject(projectId, draftSlides, globalTheme);
+      alert(`「${projectName}」を保存しました！`);
+      setIsSaveModalOpen(false);
+      setProjectName('');
+    } catch (e) {
+      console.error(e);
+      alert('保存に失敗しました。');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleOpenLoadModal = async () => {
+    setIsLoadModalOpen(true);
+    setIsLoading(true);
+    try {
+      const projects = await listProjects();
+      setSavedProjects(projects);
+    } catch (e) {
+      console.error(e);
+      alert('一覧の取得に失敗しました。');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoadProject = async (projectId) => {
+    try {
+      const data = await loadProject(projectId);
+      if (data) {
+        setDraftSlides(data.slides);
+        setSlides(data.slides);
+        if (data.theme) setGlobalTheme(data.theme);
+        setIsLoadModalOpen(false);
+        alert(`「${projectId}」を読み込みました！`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert('読み込みに失敗しました。');
+    }
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    if (!window.confirm(`「${projectId}」を削除しますか？`)) return;
+    try {
+      await deleteProject(projectId);
+      setSavedProjects(savedProjects.filter(p => p.id !== projectId));
+    } catch (e) {
+      console.error(e);
+      alert('削除に失敗しました。');
     }
   };
 
@@ -369,6 +444,24 @@ function App() {
             >
               <DownloadCloud size={16} />
               {isDownloading ? '生成中...' : '全10枚をZIPで保存'}
+            </button>
+          </div>
+
+          {/* Firebase 保存・読み込みボタン */}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              className="download-all-btn"
+              style={{ flex: 1, padding: '8px', fontSize: '13px', marginBottom: 0, justifyContent: 'center', background: '#1a4731', color: '#3fb950', border: '1px solid #2ea043', boxShadow: 'none' }}
+              onClick={() => setIsSaveModalOpen(true)}
+            >
+              <Save size={16} /> 保存する
+            </button>
+            <button
+              className="download-all-btn"
+              style={{ flex: 1, padding: '8px', fontSize: '13px', marginBottom: 0, justifyContent: 'center', background: '#1c2c4a', color: '#79c0ff', border: '1px solid #388bfd', boxShadow: 'none' }}
+              onClick={handleOpenLoadModal}
+            >
+              <FolderOpen size={16} /> 読み込む
             </button>
           </div>
         </div>
@@ -693,6 +786,89 @@ function App() {
               >
                 流し込む
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save Modal */}
+      {isSaveModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ width: '420px', backgroundColor: '#161b22', borderRadius: '12px', border: '1px solid #30363d', overflow: 'hidden' }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid #30363d', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0d1117' }}>
+              <h2 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', color: '#3fb950' }}>
+                <Save size={20} /> プロジェクトを保存
+              </h2>
+              <button onClick={() => setIsSaveModalOpen(false)} style={{ background: 'none', border: 'none', color: '#8b949e', cursor: 'pointer' }}>
+                <X size={24} />
+              </button>
+            </div>
+            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <p style={{ margin: 0, fontSize: '14px', color: '#c9d1d9' }}>保存するプロジェクト名を入力してください。</p>
+              <input
+                type="text"
+                placeholder="例: AI活用事例_2024"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveProject()}
+                style={{ padding: '10px 14px', backgroundColor: '#0d1117', border: '1px solid #30363d', color: '#c9d1d9', borderRadius: '6px', fontSize: '14px', fontFamily: 'inherit' }}
+              />
+            </div>
+            <div style={{ padding: '20px', borderTop: '1px solid #30363d', display: 'flex', justifyContent: 'flex-end', gap: '10px', backgroundColor: '#0d1117' }}>
+              <button onClick={() => setIsSaveModalOpen(false)} style={{ padding: '10px 20px', borderRadius: '50px', border: '1px solid #30363d', backgroundColor: '#21262d', color: '#c9d1d9', cursor: 'pointer', fontWeight: 600 }}>キャンセル</button>
+              <button onClick={handleSaveProject} disabled={isSaving} style={{ padding: '10px 30px', borderRadius: '50px', border: 'none', background: 'linear-gradient(135deg, #2ea043, #3fb950)', color: '#ffffff', cursor: 'pointer', fontWeight: 600 }}>
+                {isSaving ? '保存中...' : '保存する'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Load Modal */}
+      {isLoadModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ width: '520px', maxHeight: '70vh', backgroundColor: '#161b22', borderRadius: '12px', border: '1px solid #30363d', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid #30363d', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0d1117' }}>
+              <h2 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', color: '#79c0ff' }}>
+                <FolderOpen size={20} /> 保存済みプロジェクト
+              </h2>
+              <button onClick={() => setIsLoadModalOpen(false)} style={{ background: 'none', border: 'none', color: '#8b949e', cursor: 'pointer' }}>
+                <X size={24} />
+              </button>
+            </div>
+            <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+              {isLoading ? (
+                <p style={{ color: '#8b949e', textAlign: 'center' }}>読み込み中...</p>
+              ) : savedProjects.length === 0 ? (
+                <p style={{ color: '#8b949e', textAlign: 'center' }}>保存済みプロジェクトはありません。</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {savedProjects.map((project) => (
+                    <div key={project.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#0d1117', borderRadius: '8px', border: '1px solid #30363d' }}>
+                      <div>
+                        <p style={{ margin: 0, fontWeight: 600, color: '#c9d1d9' }}>{project.id}</p>
+                        <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#8b949e' }}>
+                          {project.updatedAt?.toDate ? project.updatedAt.toDate().toLocaleString('ja-JP') : '日時不明'}
+                        </p>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => handleLoadProject(project.id)}
+                          style={{ padding: '6px 14px', borderRadius: '50px', border: 'none', background: 'linear-gradient(135deg, #1f6feb, #388bfd)', color: '#fff', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}
+                        >
+                          読み込む
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProject(project.id)}
+                          style={{ padding: '6px 10px', borderRadius: '50px', border: '1px solid #f85149', background: 'transparent', color: '#f85149', cursor: 'pointer', fontSize: '13px' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
