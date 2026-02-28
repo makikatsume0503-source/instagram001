@@ -217,7 +217,7 @@ function App() {
         zip.file(slides[i].fileName, base64Data, { base64: true });
 
         element.style.transform = originalTransform;
-        await new Promise(resolve => setTimeout(resolve, 500)); // Breathing room
+        await new Promise(resolve => setTimeout(resolve, 100)); // Breathing room
       }
 
       const content = await zip.generateAsync({ type: 'blob' });
