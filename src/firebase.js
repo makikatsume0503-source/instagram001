@@ -39,8 +39,11 @@ export const db = getFirestore(app);
  */
 export const saveProject = async (projectId, slides, theme = 'navy') => {
     const projectRef = doc(db, "projects", projectId);
+    // undefinedを除去してFirestoreに安全に保存
+    const cleanSlides = JSON.parse(JSON.stringify(slides));
+    console.log('[SAVE] 保存するデータ:', { projectId, slideCount: cleanSlides.length, theme });
     await setDoc(projectRef, {
-        slides,
+        slides: cleanSlides,
         theme,
         updatedAt: serverTimestamp(),
     });
@@ -55,7 +58,9 @@ export const loadProject = async (projectId) => {
     const projectRef = doc(db, "projects", projectId);
     const snap = await getDoc(projectRef);
     if (snap.exists()) {
-        return snap.data();
+        const data = snap.data();
+        console.log('[LOAD] Firestoreから取得したデータ:', { projectId, slideCount: data.slides?.length, firstSlideTitle: data.slides?.[0]?.title, firstSlideCatchphrase: data.slides?.[0]?.catchphrase });
+        return data;
     }
     return null;
 };
