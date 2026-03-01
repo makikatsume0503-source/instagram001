@@ -283,7 +283,7 @@ function App() {
         setSlides(data.slides);
         if (data.theme) setGlobalTheme(data.theme);
         setIsLoadModalOpen(false);
-        alert(`「${projectId}」を読み込みました！\n\n【DEBUG】表紙キャッチコピー:\n「${data.slides?.[0]?.catchphrase || '(なし)'}」`);
+        alert(`「${projectId}」を読み込みました！`);
       }
     } catch (e) {
       console.error(e);
