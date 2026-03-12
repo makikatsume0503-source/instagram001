@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Slide from './components/Slide';
 import * as htmlToImage from 'html-to-image';
 import JSZip from 'jszip';
-import { DownloadCloud, Plus, Trash2, GripVertical, Sparkles, X, Save, FolderOpen } from 'lucide-react';
+import { DownloadCloud, Plus, Trash2, GripVertical, Sparkles, X, Save, FolderOpen, Settings, Copy, Check } from 'lucide-react';
 import { saveProject, loadProject, listProjects, deleteProject } from './firebase';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const defaultSlides = [
   {
@@ -138,6 +139,23 @@ function App() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [aiInputText, setAiInputText] = useState('');
+  const [aiModalTab, setAiModalTab] = useState('generate'); // 'generate' | 'json'
+
+  // Gemini AI State
+  const [geminiApiKey, setGeminiApiKey] = useState(localStorage.getItem('carousel_gemini_api_key') || '');
+  const [selectedModel, setSelectedModel] = useState(localStorage.getItem('carousel_gemini_model') || 'gemini-exp-1206');
+  const [availableModels, setAvailableModels] = useState([]);
+  const [aiTheme, setAiTheme] = useState('');
+  const [aiCaption, setAiCaption] = useState('');
+  const [aiHashtags, setAiHashtags] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [captionCopied, setCaptionCopied] = useState(false);
+
+  // Settings Modal State
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState('');
+  const [tempModel, setTempModel] = useState('gemini-exp-1206');
+  const [isFetchingModels, setIsFetchingModels] = useState(false);
 
   // Theme and Styling State
   const [globalTheme, setGlobalTheme] = useState('navy'); // 'navy' or 'light'
@@ -302,6 +320,117 @@ function App() {
     }
   };
 
+  // ========================================
+  // Gemini AI Generation
+  // ========================================
+
+  const handleGenerateWithAI = async () => {
+    if (!aiTheme.trim()) return alert('テーマを入力してください');
+    if (!geminiApiKey) {
+      alert('GeminiのAPIキーが設定されていません。ページ右上の設定アイコンからAPIキーを入力してください。');
+      setIsSettingsOpen(true);
+      return;
+    }
+
+    setIsGenerating(true);
+    setAiCaption('');
+    setAiHashtags('');
+
+    const prompt = `あなたはB2Bの「AI活用・アプリ開発・ホームページ構築」専門コンサルタント「勝手目麻希」が発信するInstagramカルーセル投稿の文章を考えるAIです。
+ターゲットは業務効率化に興味があるビジネスパーソンです。
+
+テーマ: 「${aiTheme.trim()}」
+
+このテーマで、以下の2つをJSONで出力してください。他の文章は一切出力しないでください。
+
+{
+  "slides": [
+    { "catchphrase": "(表紙用キャッチコピー15〜25文字)", "title": "(表紙タイトル、改行は<br>で。20〜35文字)" },
+    { "title": "【1】(ポイント1のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
+    { "title": "【2】(ポイント2のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
+    { "title": "【3】(ポイント3のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
+    { "title": "【4】(ポイント4のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
+    { "title": "【5】(ポイント5のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
+    { "title": "【6】(ポイント6のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
+    { "title": "【7】(ポイント7のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] }
+  ],
+  "caption": "(Instagramキャプション本文。絵文字と改行を適度に入れてスマホで読みやすくする。最初に共感の問いかけ→解決策→締め。最後に保存とフォローを促す行動喚起)",
+  "hashtags": "(関連ハッシュタグを15個。スペース区切り)"
+}
+`;
+
+    try {
+      // Use v1alpha endpoint which supports experimental models (gemini-exp-*)
+      const endpoint = selectedModel.startsWith('gemini-2.') ? 'v1beta' : 'v1alpha';
+      const apiUrl = `https://generativelanguage.googleapis.com/${endpoint}/models/${selectedModel}:generateContent?key=${geminiApiKey.trim()}`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        const msg = err.error?.message || `HTTP ${response.status}`;
+        if (response.status === 429) {
+          throw new Error(`⚠️ APIの利用制限（429）\n詳細: ${msg}`);
+        }
+        throw new Error(`[${response.status}] ${msg}`);
+      }
+
+      const data = await response.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+      // Extract JSON from code block if present
+      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]+?)```/) || [null, text];
+      const jsonText = jsonMatch[1].trim();
+      const parsed = JSON.parse(jsonText);
+
+      // Apply slides
+      if (parsed.slides) {
+        const newDrafts = [...draftSlides];
+        parsed.slides.forEach((item, index) => {
+          if (index === 0 && newDrafts[0].type === 'cover') {
+            if (item.catchphrase) newDrafts[0].catchphrase = item.catchphrase;
+            if (item.title) newDrafts[0].title = item.title;
+          } else if (index >= 1 && index <= 7 && newDrafts[index].type === 'list') {
+            if (item.title) newDrafts[index].title = item.title;
+            if (item.content) {
+              if (Array.isArray(item.content)) {
+                newDrafts[index].bullets = item.content;
+                newDrafts[index].displayMode = 'bullets';
+              } else {
+                newDrafts[index].bodyText = item.content;
+                newDrafts[index].displayMode = 'text';
+              }
+            }
+          }
+        });
+        setDraftSlides(newDrafts);
+        setSlides(newDrafts);
+      }
+
+      if (parsed.caption) setAiCaption(parsed.caption);
+      if (parsed.hashtags) setAiHashtags(parsed.hashtags);
+
+    } catch (e) {
+      console.error(e);
+      alert(`AIの生成に失敗しました。\n${e.message}\n\nAPIキーを確認するか、しばらくしてから再試行してください。`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCopyCaption = () => {
+    const fullText = `${aiCaption}\n\n${aiHashtags}`;
+    navigator.clipboard.writeText(fullText);
+    setCaptionCopied(true);
+    setTimeout(() => setCaptionCopied(false), 2000);
+  };
+
   // Parses AI JSON and updates draft slides
   const handleAIImport = () => {
     try {
@@ -431,11 +560,20 @@ function App() {
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
               className="download-all-btn"
-              style={{ flex: 1, padding: '8px', fontSize: '13px', marginBottom: 0, justifyContent: 'center', background: '#30363d', color: '#c9d1d9', border: '1px solid #484f58', boxShadow: 'none' }}
+              style={{ flex: 1, padding: '8px', fontSize: '13px', marginBottom: 0, justifyContent: 'center', background: 'linear-gradient(135deg, #1f3a6e, #388bfd)', color: '#fff', border: '1px solid #388bfd', boxShadow: 'none' }}
               onClick={() => setIsAIModalOpen(true)}
             >
-              <Sparkles size={16} color="#f4d990" /> AIから一括入力
+              <Sparkles size={16} color="#f4d990" /> AI自動生成
             </button>
+            <button
+              className="download-all-btn"
+              style={{ flex: 1, padding: '8px', fontSize: '13px', marginBottom: 0, justifyContent: 'center', background: '#0d1117', color: '#c9d1d9', border: '1px solid #484f58', boxShadow: 'none' }}
+              onClick={() => { setTempApiKey(geminiApiKey); setTempModel(selectedModel); setIsSettingsOpen(true); }}
+            >
+              <Settings size={16} /> APIキー設定
+            </button>
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
             <button
               className="download-all-btn"
               style={{ flex: 1, padding: '8px', fontSize: '13px', marginBottom: 0, justifyContent: 'center' }}
@@ -737,54 +875,186 @@ function App() {
         </div>
       </div>
 
-      {/* AI Import Modal */}
+      {/* AI Generate & Import Modal */}
       {isAIModalOpen && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-          <div style={{ width: '600px', backgroundColor: '#161b22', borderRadius: '12px', border: '1px solid #30363d', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ width: '640px', maxHeight: '90vh', backgroundColor: '#161b22', borderRadius: '12px', border: '1px solid #30363d', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {/* Modal Header */}
             <div style={{ padding: '20px', borderBottom: '1px solid #30363d', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0d1117' }}>
               <h2 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sparkles size={20} color="#f4d990" /> AIで作った文章を一括流し込み
+                <Sparkles size={20} color="#f4d990" /> AI自動生成
               </h2>
-              <button
-                onClick={() => setIsAIModalOpen(false)}
-                style={{ background: 'none', border: 'none', color: '#8b949e', cursor: 'pointer' }}
-              >
+              <button onClick={() => setIsAIModalOpen(false)} style={{ background: 'none', border: 'none', color: '#8b949e', cursor: 'pointer' }}>
                 <X size={24} />
               </button>
             </div>
-            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <p style={{ margin: 0, fontSize: '14px', color: '#c9d1d9', lineHeight: 1.5 }}>
-                Gemini等のAIで出力された <strong>JSON（配列）データ</strong> を下の枠に貼り付けてください。<br />
-                ※対象は <strong>スライド1枚目（表紙）〜8枚目</strong> です。（先頭のデータが表紙に割り当てられます）
-              </p>
-              <div style={{ backgroundColor: '#0d1117', padding: '15px', borderRadius: '6px', border: '1px solid #30363d', fontSize: '12px', color: '#8b949e', fontFamily: 'monospace' }}>
-                【入力フォーマット例：全8要素】<br />
-                [<br />
-                &nbsp;&nbsp;&#123; "catchphrase": "〇〇な人へ", "title": "解決策&lt;br&gt;7選" &#125;, &nbsp;// ← 1枚目(表紙) <br />
-                &nbsp;&nbsp;&#123; "title": "【1】 どんな内容でもOK", "content": "「content」キーに文章や箇条書きを指定すると、アプリが勝手に判別します！" &#125;, <br />
-                &nbsp;&nbsp;&#123; "title": "【2】 箇条書き", "content": ["ポイント1", "ポイント2"] &#125;, // ← 3枚目<br />
-                &nbsp;&nbsp;...<br />
-                ]
-              </div>
-              <textarea
-                placeholder="ここにJSONデータを貼り付けてください..."
-                value={aiInputText}
-                onChange={(e) => setAiInputText(e.target.value)}
-                style={{ width: '100%', height: '200px', backgroundColor: '#0d1117', border: '1px solid #30363d', color: '#c9d1d9', padding: '15px', borderRadius: '6px', fontFamily: 'monospace', resize: 'vertical', boxSizing: 'border-box' }}
-              />
+            {/* Tab Switch */}
+            <div style={{ display: 'flex', backgroundColor: '#0d1117', borderBottom: '1px solid #30363d' }}>
+              {[['generate', '✨ テーマから自動生成'], ['json', '📋 JSONを貼り付け']].map(([tab, label]) => (
+                <button key={tab} onClick={() => setAiModalTab(tab)} style={{ flex: 1, padding: '12px', border: 'none', background: 'none', color: aiModalTab === tab ? '#f4d990' : '#8b949e', fontWeight: aiModalTab === tab ? 700 : 400, borderBottom: aiModalTab === tab ? '2px solid #f4d990' : '2px solid transparent', cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s' }}>
+                  {label}
+                </button>
+              ))}
             </div>
-            <div style={{ padding: '20px', borderTop: '1px solid #30363d', display: 'flex', justifyContent: 'flex-end', gap: '10px', backgroundColor: '#0d1117' }}>
-              <button
-                onClick={() => setIsAIModalOpen(false)}
-                style={{ padding: '10px 20px', borderRadius: '50px', border: '1px solid #30363d', backgroundColor: '#21262d', color: '#c9d1d9', cursor: 'pointer', fontWeight: 600 }}
-              >
-                キャンセル
+            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px', overflowY: 'auto' }}>
+              {aiModalTab === 'generate' ? (
+                <>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#8b949e', lineHeight: 1.6 }}>
+                    テーマを入力するだけで、<strong style={{ color: '#c9d1d9' }}>スライド10枚分の本文・Instagram投稿キャプション・ハッシュタグ</strong>を一括生成します！
+                    <br />※GeminiのAPIキーが必要です。未設定の場合は左の「APIキー設定」ボタンから設定してください。
+                  </p>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#c9d1d9', display: 'block', marginBottom: '8px' }}>📝 カルーセルのテーマ・お題</label>
+                    <input
+                      type="text"
+                      placeholder="例：初心者でもできるAI活用法5選、業務効率化に使えるAIツール紹介..."
+                      value={aiTheme}
+                      onChange={(e) => setAiTheme(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && !isGenerating && handleGenerateWithAI()}
+                      style={{ width: '100%', padding: '12px 14px', backgroundColor: '#0d1117', border: '1px solid #30363d', color: '#c9d1d9', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  {(aiCaption || aiHashtags) && (
+                    <div style={{ backgroundColor: '#0d1117', borderRadius: '8px', border: '1px solid #30363d', overflow: 'hidden' }}>
+                      <div style={{ padding: '12px 16px', borderBottom: '1px solid #30363d', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#c9d1d9' }}>📱 投稿キャプション＆ハッシュタグ（コピー用）</span>
+                        <button
+                          onClick={handleCopyCaption}
+                          style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '50px', border: 'none', background: captionCopied ? '#2ea043' : '#21262d', color: captionCopied ? '#fff' : '#c9d1d9', cursor: 'pointer', fontSize: '12px', fontWeight: 600, transition: 'all 0.2s' }}
+                        >
+                          {captionCopied ? <><Check size={14} /> コピー済！</> : <><Copy size={14} /> コピーする</>}
+                        </button>
+                      </div>
+                      <div style={{ padding: '14px 16px' }}>
+                        <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#c9d1d9', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{aiCaption}</p>
+                        <p style={{ margin: 0, fontSize: '13px', color: '#58a6ff', lineHeight: 1.8 }}>{aiHashtags}</p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p style={{ margin: 0, fontSize: '14px', color: '#c9d1d9', lineHeight: 1.5 }}>
+                    AIで出力した <strong>JSON（配列）データ</strong> を貼り付けてください。<br />
+                    ※対象は<strong>スライド1枚目（表紙）〜8枚目</strong>です。
+                  </p>
+                  <div style={{ backgroundColor: '#0d1117', padding: '12px', borderRadius: '6px', border: '1px solid #30363d', fontSize: '11px', color: '#8b949e', fontFamily: 'monospace', lineHeight: 1.7 }}>
+                    [{'{'}"catchphrase": "表紙コピー", "title": "タイトル&lt;br&gt;7選"{'}'},<br />
+                    &nbsp;{'{'} "title": "【1】ポイント", "content": ["箇条1", "箇条2"] {'}'}, ...]
+                  </div>
+                  <textarea
+                    placeholder="ここにJSONデータを貼り付けてください..."
+                    value={aiInputText}
+                    onChange={(e) => setAiInputText(e.target.value)}
+                    style={{ width: '100%', height: '180px', backgroundColor: '#0d1117', border: '1px solid #30363d', color: '#c9d1d9', padding: '15px', borderRadius: '6px', fontFamily: 'monospace', resize: 'vertical', boxSizing: 'border-box' }}
+                  />
+                </>
+              )}
+            </div>
+            <div style={{ padding: '16px 20px', borderTop: '1px solid #30363d', display: 'flex', justifyContent: 'flex-end', gap: '10px', backgroundColor: '#0d1117' }}>
+              <button onClick={() => setIsAIModalOpen(false)} style={{ padding: '10px 20px', borderRadius: '50px', border: '1px solid #30363d', backgroundColor: '#21262d', color: '#c9d1d9', cursor: 'pointer', fontWeight: 600 }}>
+                閉じる
               </button>
+              {aiModalTab === 'generate' ? (
+                <button
+                  onClick={handleGenerateWithAI}
+                  disabled={isGenerating || !aiTheme.trim()}
+                  style={{ padding: '10px 30px', borderRadius: '50px', border: 'none', background: isGenerating ? '#30363d' : 'linear-gradient(135deg, #1f6feb, #388bfd)', color: '#ffffff', cursor: isGenerating ? 'not-allowed' : 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  {isGenerating ? <><span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span> 生成中...</> : <><Sparkles size={16} /> スライドを一括生成</>}
+                </button>
+              ) : (
+                <button onClick={handleAIImport} style={{ padding: '10px 30px', borderRadius: '50px', border: 'none', background: 'linear-gradient(135deg, #1f6feb, #388bfd)', color: '#ffffff', cursor: 'pointer', fontWeight: 600 }}>
+                  流し込む
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
+          <div style={{ width: '460px', backgroundColor: '#161b22', borderRadius: '12px', border: '1px solid #30363d', overflow: 'hidden' }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid #30363d', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0d1117' }}>
+              <h2 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', color: '#c9d1d9' }}>
+                <Settings size={20} /> API設定
+              </h2>
+              <button onClick={() => setIsSettingsOpen(false)} style={{ background: 'none', border: 'none', color: '#8b949e', cursor: 'pointer' }}>
+                <X size={24} />
+              </button>
+            </div>
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#c9d1d9', display: 'block', marginBottom: '8px' }}>Google Gemini APIキー</label>
+                <input
+                  type="password"
+                  placeholder="AIzaSy..."
+                  value={tempApiKey}
+                  onChange={(e) => setTempApiKey(e.target.value)}
+                  style={{ width: '100%', padding: '12px 14px', backgroundColor: '#0d1117', border: '1px solid #30363d', color: '#c9d1d9', borderRadius: '8px', fontSize: '14px', fontFamily: 'monospace', boxSizing: 'border-box' }}
+                />
+                <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#8b949e' }}>
+                  <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" style={{ color: '#58a6ff' }}>Google AI Studio</a>でAPIキーを取得できます。このキーはブラウザのみに保存されます。
+                </p>
+              </div>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#c9d1d9' }}>使用モデル</label>
+                  <button
+                    onClick={async () => {
+                      if (!tempApiKey.trim()) return alert('先にAPIキーを入力してください');
+                      setIsFetchingModels(true);
+                      try {
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${tempApiKey.trim()}`);
+                        const data = await res.json();
+                        const models = (data.models || [])
+                          .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+                          .map(m => m.name.replace('models/', ''));
+                        setAvailableModels(models);
+                      } catch (e) { alert('モデル一覧の取得に失敗しました'); }
+                      finally { setIsFetchingModels(false); }
+                    }}
+                    style={{ padding: '4px 12px', borderRadius: '50px', border: '1px solid #30363d', background: '#21262d', color: '#8b949e', cursor: 'pointer', fontSize: '12px' }}
+                  >
+                    {isFetchingModels ? '取得中...' : '🔄 利用可能モデルを取得'}
+                  </button>
+                </div>
+                {availableModels.length > 0 ? (
+                  <select
+                    value={tempModel}
+                    onChange={(e) => setTempModel(e.target.value)}
+                    style={{ width: '100%', padding: '10px 14px', backgroundColor: '#0d1117', border: '1px solid #30363d', color: '#c9d1d9', borderRadius: '8px', fontSize: '13px', fontFamily: 'inherit' }}
+                  >
+                    {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={tempModel}
+                    onChange={(e) => setTempModel(e.target.value)}
+                    placeholder="gemini-2.0-flash"
+                    style={{ width: '100%', padding: '10px 14px', backgroundColor: '#0d1117', border: '1px solid #30363d', color: '#c9d1d9', borderRadius: '8px', fontSize: '13px', fontFamily: 'monospace', boxSizing: 'border-box' }}
+                  />
+                )}
+                <p style={{ margin: '6px 0 0', fontSize: '11px', color: '#6e7681' }}>※ APIキーを入力後「利用可能モデルを取得」ボタンで選択肢が表示されます</p>
+              </div>
+            </div>
+            <div style={{ padding: '16px 24px', borderTop: '1px solid #30363d', display: 'flex', justifyContent: 'flex-end', gap: '10px', backgroundColor: '#0d1117' }}>
+              <button onClick={() => setIsSettingsOpen(false)} style={{ padding: '10px 20px', borderRadius: '50px', border: '1px solid #30363d', backgroundColor: '#21262d', color: '#c9d1d9', cursor: 'pointer', fontWeight: 600 }}>キャンセル</button>
               <button
-                onClick={handleAIImport}
-                style={{ padding: '10px 30px', borderRadius: '50px', border: 'none', background: 'linear-gradient(135deg, #1f6feb, #388bfd)', color: '#ffffff', cursor: 'pointer', fontWeight: 600 }}
+                onClick={() => {
+                  localStorage.setItem('carousel_gemini_api_key', tempApiKey.trim());
+                  localStorage.setItem('carousel_gemini_model', tempModel);
+                  setGeminiApiKey(tempApiKey.trim());
+                  setSelectedModel(tempModel);
+                  setIsSettingsOpen(false);
+                  alert(`保存しました！\nモデル: ${tempModel}`);
+                }}
+                style={{ padding: '10px 30px', borderRadius: '50px', border: 'none', background: 'linear-gradient(135deg, #2ea043, #3fb950)', color: '#ffffff', cursor: 'pointer', fontWeight: 600 }}
               >
-                流し込む
+                保存する
               </button>
             </div>
           </div>
