@@ -18,93 +18,86 @@ const defaultSlides = [
   },
   {
     id: 'slide2',
-    fileName: '02_usecase1.png',
-    type: 'list',
+    fileName: '02_intro.png',
+    type: 'intro',
     bgImage: '/slide_usecase_bg_1_1772098805176.png',
+    title: 'はじめに',
+    bullets: [
+      'このカルーセルで学べること・得られること',
+      '対象となる方・こんなお悩みをお持ちの方へ',
+      'AIを活用することで変わること'
+    ]
+  },
+  {
+    id: 'slide3',
+    fileName: '03_usecase1.png',
+    type: 'list',
+    bgImage: '/slide_usecase_bg_2_1772099168623.png',
     title: '【1】 文章作成',
     bullets: [
       'ブログ記事の執筆や骨組みの自動作成',
       'SNSの投稿文作成やハッシュタグ考案',
       '顧客へのメールや謝罪文のドラフト作成',
-      'プレスリリースやPR文の叩き台作り',
-      '長文の文章を「要約」や「箇条書き」に変換'
-    ]
-  },
-  {
-    id: 'slide3',
-    fileName: '03_usecase2.png',
-    type: 'list',
-    bgImage: '/slide_usecase_bg_2_1772099168623.png',
-    title: '【2】 画像生成',
-    bullets: [
-      'SNSやブログ用のアイキャッチ画像の生成',
-      'プレゼン資料の挿絵やイメージ画像の作成',
-      'プロンプト１つで様々なテイスト（水彩・アニメ風等）の絵に',
-      '自社商品の宣伝用「架空の使用イメージ」の作成'
     ]
   },
   {
     id: 'slide4',
-    fileName: '04_usecase3.png',
+    fileName: '04_usecase2.png',
     type: 'list',
     bgImage: '/slide_usecase_bg_3_1772098574132.png',
-    title: '【3】 資料作成',
+    title: '【2】 画像生成',
     bullets: [
-      '会議の録音データから「議事録」とToDoを自動抽出',
-      '構成案を入力して「スライド・企画書」の叩き台を作成',
-      'バラバラなデータを要約した「週次レポート」の出力',
-      '新人研修用の「業務マニュアル」のフォーマット化'
+      'SNSやブログ用のアイキャッチ画像の生成',
+      'プロンプト１つで様々なテイストの絵に',
+      '自社商品の宣伝用イメージの作成'
     ]
   },
   {
     id: 'slide5',
-    fileName: '05_usecase4.png',
+    fileName: '05_usecase3.png',
     type: 'list',
     bgImage: '/slide_usecase_bg_4_1772099435711.png',
-    title: '【4】 ホームページ作成',
+    title: '【3】 資料作成',
     bullets: [
-      'LPやHPの「構成案」や「ワイヤーフレーム」を一瞬で作成',
-      'ターゲットの心に刺さる「キャッチコピー」の複数提案',
-      'デザインのベースとなるHTML/CSSコードの自動出力',
-      'FAQや「よくある質問」の想定リスト作成'
+      '会議録音データから議事録を自動抽出',
+      'スライド・企画書の叩き台を作成',
+      '新人研修用マニュアルのフォーマット化'
     ]
   },
   {
     id: 'slide6',
-    fileName: '06_usecase5.png',
+    fileName: '06_usecase4.png',
     type: 'list',
     bgImage: '/slide_usecase_bg_5_1772099463004.png',
-    title: '【5】 アプリ作成',
+    title: '【4】 ホームページ作成',
     bullets: [
-      'プログラミング不要で日々の業務アプリを構築',
-      '顧客情報や日報を一元管理・検索できるシステム',
-      'アイデアをその場で動く「カタチ」にする技術'
+      'LPやHPの構成案・ワイヤーフレームを瞬時に作成',
+      'ターゲットに刺さるキャッチコピーの複数提案',
+      'HTML/CSSコードの自動出力'
     ]
   },
   {
     id: 'slide7',
-    fileName: '07_usecase6.png',
+    fileName: '07_usecase5.png',
     type: 'list',
     bgImage: '/slide_usecase_bg_6_research_1772102726728.png',
-    title: '【6】 リサーチ・競合調査・情報整理',
+    title: '【5】 アプリ作成',
     bullets: [
-      '業界トレンドや長時間のYouTube動画の瞬時な要約',
-      '競合他社の強み・弱みの自動分析と表組みでのリスト化',
-      '海外の英語記事や最新論文を翻訳・要約してキャッチアップ',
-      '散らばった情報やメモを構造的にマインドマップ形式で整理'
+      'プログラミング不要で業務アプリを構築',
+      '顧客情報や日報を一元管理するシステム',
+      'アイデアをその場で動くカタチに'
     ]
   },
   {
     id: 'slide8',
-    fileName: '08_usecase7.png',
+    fileName: '08_usecase6.png',
     type: 'list',
     bgImage: '/slide_usecase_bg_7_brainstorm_1772102753451.png',
-    title: '【7】 アイデア出し・壁打ち',
+    title: '【6】 リサーチ・情報整理',
     bullets: [
-      '新規事業やイベント企画の「100本ノック（壁打ち）」',
-      '経営の悩みに対する「客観的かつ論理的なアドバイス」',
-      '理想のペルソナ（お客様像）の解像度アップと明確化',
-      '新規プロジェクトの「予期せぬトラブル」の想定と対策案'
+      '業界トレンドや動画の瞬時な要約',
+      '競合他社の強み・弱みを自動分析',
+      '散らばった情報をマインドマップ形式で整理'
     ]
   },
   {
@@ -350,13 +343,13 @@ ${aiInstructions.trim()}
 {
   "slides": [
     { "catchphrase": "(表紙用キャッチコピー15〜25文字)", "title": "(表紙タイトル、改行は<br>で。20〜35文字)" },
+    { "title": "はじめに", "intro": "(このカルーセルで得られること・対象読者・読む価値を2〜3文で。共感を引き出す導入文)", "bullets": ["(読者が得られること1)", "(読者が得られること2)", "(読者が得られること3)"] },
     { "title": "【1】(ポイント1のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
     { "title": "【2】(ポイント2のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
     { "title": "【3】(ポイント3のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
     { "title": "【4】(ポイント4のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
     { "title": "【5】(ポイント5のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
-    { "title": "【6】(ポイント6のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
-    { "title": "【7】(ポイント7のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] }
+    { "title": "【6】(ポイント6のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] }
   ],
   "caption": "(Instagramキャプション本文。絵文字と改行を適度に入れてスマホで読みやすくする。最初に共感の問いかけ→解決策→締め。最後に保存とフォローを促す行動喚起)",
   "hashtags": "(関連ハッシュタグを15個。スペース区切り)"
@@ -397,9 +390,18 @@ ${aiInstructions.trim()}
         const newDrafts = [...draftSlides];
         parsed.slides.forEach((item, index) => {
           if (index === 0 && newDrafts[0].type === 'cover') {
+            // Slide 1: Cover
             if (item.catchphrase) newDrafts[0].catchphrase = item.catchphrase;
             if (item.title) newDrafts[0].title = item.title;
-          } else if (index >= 1 && index <= 7 && newDrafts[index].type === 'list') {
+          } else if (index === 1 && newDrafts[1].type === 'intro') {
+            // Slide 2: はじめに
+            if (item.title) newDrafts[1].title = item.title;
+            if (item.bullets && Array.isArray(item.bullets)) {
+              newDrafts[1].bullets = item.bullets;
+              newDrafts[1].displayMode = 'bullets';
+            }
+          } else if (index >= 2 && index <= 7 && newDrafts[index]?.type === 'list') {
+            // Slides 3-8: Content
             if (item.title) newDrafts[index].title = item.title;
             if (item.content) {
               if (Array.isArray(item.content)) {

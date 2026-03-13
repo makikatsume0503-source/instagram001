@@ -101,6 +101,24 @@ const Slide = ({ data, id }) => {
             {data.footer && <div className="instructor-tag">{data.footer}</div>}
           </>
         );
+      case 'intro':
+        return (
+          <>
+            <div className="slide-subtitle gold-text" style={data.titleScale ? { '--local-scale': data.titleScale } : undefined}>{data.title || 'はじめに'}</div>
+            <div className="slide-body" style={data.bodyScale ? { '--local-scale': data.bodyScale } : undefined}>
+              {data.displayMode === 'text' ? (
+                <div dangerouslySetInnerHTML={{ __html: data.bodyText || '' }}></div>
+              ) : (
+                <ul>
+                  {data.bullets?.map((bullet, index) => (
+                    <li key={index}>{bullet}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {data.footer && <div className="instructor-tag">{data.footer}</div>}
+          </>
+        );
       case 'cta':
         return (
           <>
