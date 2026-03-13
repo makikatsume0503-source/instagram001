@@ -1012,6 +1012,10 @@ function App() {
                           .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
                           .map(m => m.name.replace('models/', ''));
                         setAvailableModels(models);
+                        if (models.length > 0) {
+                          const preferred = models.find(m => m.includes('gemini-2.0-flash')) || models[0];
+                          setTempModel(preferred);
+                        }
                       } catch (e) { alert('モデル一覧の取得に失敗しました'); }
                       finally { setIsFetchingModels(false); }
                     }}
