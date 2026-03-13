@@ -143,7 +143,7 @@ function App() {
 
   // Gemini AI State
   const [geminiApiKey, setGeminiApiKey] = useState(localStorage.getItem('carousel_gemini_api_key') || '');
-  const [selectedModel, setSelectedModel] = useState(localStorage.getItem('carousel_gemini_model') || 'gemini-exp-1206');
+  const [selectedModel, setSelectedModel] = useState(localStorage.getItem('carousel_gemini_model') || 'gemini-2.0-flash');
   const [availableModels, setAvailableModels] = useState([]);
   const [aiTheme, setAiTheme] = useState('');
   const [aiCaption, setAiCaption] = useState('');
@@ -154,7 +154,7 @@ function App() {
   // Settings Modal State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [tempApiKey, setTempApiKey] = useState('');
-  const [tempModel, setTempModel] = useState('gemini-exp-1206');
+  const [tempModel, setTempModel] = useState('gemini-2.0-flash');
   const [isFetchingModels, setIsFetchingModels] = useState(false);
 
   // Theme and Styling State
@@ -360,9 +360,8 @@ function App() {
 `;
 
     try {
-      // Use v1alpha endpoint which supports experimental models (gemini-exp-*)
-      const endpoint = selectedModel.startsWith('gemini-2.') ? 'v1beta' : 'v1alpha';
-      const apiUrl = `https://generativelanguage.googleapis.com/${endpoint}/models/${selectedModel}:generateContent?key=${geminiApiKey.trim()}`;
+      // Use v1beta endpoint (standard for all current Gemini models)
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${geminiApiKey.trim()}`;
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
