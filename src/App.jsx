@@ -143,7 +143,7 @@ function App() {
 
   // Gemini AI State
   const [geminiApiKey, setGeminiApiKey] = useState(localStorage.getItem('carousel_gemini_api_key') || '');
-  const [selectedModel, setSelectedModel] = useState(localStorage.getItem('carousel_gemini_model') || 'gemini-2.0-flash');
+  const [selectedModel, setSelectedModel] = useState(localStorage.getItem('carousel_gemini_model') || 'gemini-2.5-flash');
   const [availableModels, setAvailableModels] = useState([]);
   const [aiTheme, setAiTheme] = useState('');
   const [aiCaption, setAiCaption] = useState('');
@@ -154,7 +154,7 @@ function App() {
   // Settings Modal State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [tempApiKey, setTempApiKey] = useState('');
-  const [tempModel, setTempModel] = useState('gemini-2.0-flash');
+  const [tempModel, setTempModel] = useState('gemini-2.5-flash');
   const [isFetchingModels, setIsFetchingModels] = useState(false);
 
   // Theme and Styling State
@@ -1013,7 +1013,7 @@ function App() {
                           .map(m => m.name.replace('models/', ''));
                         setAvailableModels(models);
                         if (models.length > 0) {
-                          const preferred = models.find(m => m.includes('gemini-2.0-flash')) || models[0];
+                          const preferred = models.find(m => m.includes('gemini-2.5-flash')) || models.find(m => m.includes('gemini-2.0-flash')) || models[0];
                           setTempModel(preferred);
                         }
                       } catch (e) { alert('モデル一覧の取得に失敗しました'); }
