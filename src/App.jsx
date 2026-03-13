@@ -22,11 +22,8 @@ const defaultSlides = [
     type: 'intro',
     bgImage: '/slide_usecase_bg_1_1772098805176.png',
     title: 'はじめに',
-    bullets: [
-      'このカルーセルで学べること・得られること',
-      '対象となる方・こんなお悩みをお持ちの方へ',
-      'AIを活用することで変わること'
-    ]
+    displayMode: 'text',
+    bodyText: '「AIって難しそう…」そう感じていませんか？<br><br>実は、AIは<strong>毎日の仕事を楽にする</strong>ための強力なツール。<br><br>このカルーセルでは、業務効率化に役立つAI活用法を厳選してご紹介します。<br>ぜひ保存して、明日から取り入れてみてください！'
   },
   {
     id: 'slide3',
@@ -343,7 +340,7 @@ ${aiInstructions.trim()}
 {
   "slides": [
     { "catchphrase": "(表紙用キャッチコピー15〜25文字)", "title": "(表紙タイトル、改行は<br>で。20〜35文字)" },
-    { "title": "はじめに", "intro": "(このカルーセルで得られること・対象読者・読む価値を2〜3文で。共感を引き出す導入文)", "bullets": ["(読者が得られること1)", "(読者が得られること2)", "(読者が得られること3)"] },
+    { "title": "はじめに", "text": "(読者が抱える悩みへの共感→このカルーセルで解決できること→読む価値を3〜5文で書いた段落テキスト。HTML可、改行は<br>で)" },
     { "title": "【1】(ポイント1のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
     { "title": "【2】(ポイント2のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
     { "title": "【3】(ポイント3のタイトル)", "content": ["箇条書き1", "箇条書き2", "箇条書き3"] },
@@ -394,9 +391,12 @@ ${aiInstructions.trim()}
             if (item.catchphrase) newDrafts[0].catchphrase = item.catchphrase;
             if (item.title) newDrafts[0].title = item.title;
           } else if (index === 1 && newDrafts[1].type === 'intro') {
-            // Slide 2: はじめに
+            // Slide 2: はじめに（文章形式）
             if (item.title) newDrafts[1].title = item.title;
-            if (item.bullets && Array.isArray(item.bullets)) {
+            if (item.text) {
+              newDrafts[1].bodyText = item.text;
+              newDrafts[1].displayMode = 'text';
+            } else if (item.bullets && Array.isArray(item.bullets)) {
               newDrafts[1].bullets = item.bullets;
               newDrafts[1].displayMode = 'bullets';
             }
