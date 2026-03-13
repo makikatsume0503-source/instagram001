@@ -13,7 +13,7 @@ const defaultSlides = [
     type: 'cover',
     bgImage: '/slide_cover_bg_navy_1772083156167.png',
     catchphrase: '「圧倒的な効率」と「プロの品質」を両立',
-    title: '仕事の質を高める<br/>AIの<br/>活用事例 7選',
+    title: '仕事の質を高める<br/>AIの<br/>活用事例 6選',
     footer: 'AI活用インストラクター FinEdit 勝目麻希'
   },
   {
