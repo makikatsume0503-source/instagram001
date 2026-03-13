@@ -146,6 +146,7 @@ function App() {
   const [selectedModel, setSelectedModel] = useState(localStorage.getItem('carousel_gemini_model') || 'gemini-2.5-flash');
   const [availableModels, setAvailableModels] = useState([]);
   const [aiTheme, setAiTheme] = useState('');
+  const [aiInstructions, setAiInstructions] = useState('');
   const [aiCaption, setAiCaption] = useState('');
   const [aiHashtags, setAiHashtags] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -340,7 +341,10 @@ function App() {
 ターゲットは業務効率化に興味があるビジネスパーソンです。
 
 テーマ: 「${aiTheme.trim()}」
-
+${aiInstructions.trim() ? `
+追加指示:
+${aiInstructions.trim()}
+` : ''}
 このテーマで、以下の2つをJSONで出力してください。他の文章は一切出力しないでください。
 
 {
@@ -911,6 +915,15 @@ function App() {
                       onChange={(e) => setAiTheme(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && !isGenerating && handleGenerateWithAI()}
                       style={{ width: '100%', padding: '12px 14px', backgroundColor: '#0d1117', border: '1px solid #30363d', color: '#c9d1d9', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#c9d1d9', display: 'block', marginBottom: '8px' }}>💬 追加指示・要望（任意）</label>
+                    <textarea
+                      placeholder="例：初心者向けに優しい言葉で・ユーモアを少し入れて・体験談ベースで書いて・英語でもOK..."
+                      value={aiInstructions}
+                      onChange={(e) => setAiInstructions(e.target.value)}
+                      style={{ width: '100%', height: '72px', padding: '10px 14px', backgroundColor: '#0d1117', border: '1px solid #30363d', color: '#c9d1d9', borderRadius: '8px', fontSize: '13px', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box', lineHeight: 1.6 }}
                     />
                   </div>
                   {(aiCaption || aiHashtags) && (
