@@ -754,6 +754,44 @@ ${aiInstructions.trim()}
                 </>
               )}
 
+              {/* Intro Fields */}
+              {slide.type === 'intro' && (
+                <>
+                  <div className="form-group">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>スライド見出し</label>
+                      <FontSizeSlider slideId={slide.id} fieldKey="titleScale" value={slide.titleScale} />
+                    </div>
+                    <input
+                      type="text"
+                      value={slide.title || 'はじめに'}
+                      onChange={(e) => handleUpdateSlide(slide.id, 'title', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ margin: 0 }}>本文 (HTML可)</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <FontSizeSlider slideId={slide.id} fieldKey="bodyScale" value={slide.bodyScale} />
+                        <button
+                          className="add-btn"
+                          style={{ padding: '4px 8px', margin: 0, fontSize: '12px', width: 'auto' }}
+                          onClick={() => handleUpdateSlide(slide.id, 'bodyText', (slide.bodyText || '') + '<br>')}
+                        >
+                          <Plus size={14} /> 改行追加
+                        </button>
+                      </div>
+                    </div>
+                    <textarea
+                      value={slide.bodyText || ''}
+                      onChange={(e) => handleUpdateSlide(slide.id, 'bodyText', e.target.value)}
+                      placeholder="はじめにの本文を入力... (改行は<br>で)"
+                      style={{ minHeight: '120px' }}
+                    />
+                  </div>
+                </>
+              )}
+
               {/* CTA Fields */}
               {slide.type === 'cta' && (
                 <>
